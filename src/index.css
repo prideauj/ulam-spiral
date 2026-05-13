@@ -176,7 +176,7 @@ label {
 }
 
 .tooltip {
-  position: absolute;
+  position: fixed;
   pointer-events: none;
   background: rgba(20, 24, 32, 0.95);
   border: 1px solid #3a4252;
@@ -186,6 +186,13 @@ label {
   white-space: nowrap;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   z-index: 10;
+}
+
+.legend-list li .formula {
+  color: #f0b46a;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  margin-top: 0.15rem;
 }
 
 .tooltip .tt-title {

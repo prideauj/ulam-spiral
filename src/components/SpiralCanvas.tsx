@@ -339,13 +339,10 @@ export function SpiralCanvas({
         }
       }
 
-      if (pointHit) {
-        onHover(null, pointHit, e.clientX, e.clientY);
-        return;
-      }
-
-      // Otherwise fall back to line hit-testing. Match the extended endpoints
-      // that the renderer uses, so hover works anywhere along the visible line.
+      // Also line hit-test (don't early-return on point hit). Lines pass
+      // through their integer points by construction, so a dot under the
+      // cursor almost always sits on a line. Showing both lets the user see
+      // the integer AND the line's stats/formula at once.
       const tol = 6 / view.ppu;
       const tol2 = tol * tol;
       const bboxDiag = bbox
@@ -369,7 +366,7 @@ export function SpiralCanvas({
           best = line;
         }
       }
-      onHover(best, null, e.clientX, e.clientY);
+      onHover(best, pointHit, e.clientX, e.clientY);
     },
     [view, size, lines, onHover, positions, isPrime, pointIndex, bbox]
   );

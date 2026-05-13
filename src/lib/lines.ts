@@ -116,9 +116,29 @@ export function analyseLines(
       // Sort ints ascending so dedup signatures are canonical regardless
       // of which direction (θ vs θ+180°) discovered the line.
       const sortedInts = ints.slice().sort((a, b) => a - b);
-      // Normalize line direction to a unit vector — used by the renderer to
-      // extend the line across the spiral bbox.
+
+      // Split the line into two halves at projection=0 along the line dir.
+      // Within each half, integers grow monotonically with along-line distance,
+      // so they fit a single quadratic. The merged list does NOT fit one
+      // quadratic (the two halves are different sequences interleaved by value).
       const dlen = Math.hypot(dirX, dirY) || 1;
+      const udx = dirX / dlen;
+      const udy = dirY / dlen;
+      const projAlong = ints.map((k) => {
+        const px = positions[(k - 1) * 2];
+        const py = positions[(k - 1) * 2 + 1];
+        return px * udx + py * udy;
+      });
+      const order = ints.map((_, i) => i);
+      order.sort((a, b) => projAlong[a] - projAlong[b]);
+      const halfA: number[] = []; // projection <= 0, will be reversed center-outward
+      const halfB: number[] = []; // projection > 0, already center-outward
+      for (const i of order) {
+        if (projAlong[i] > 0) halfB.push(ints[i]);
+        else halfA.push(ints[i]);
+      }
+      halfA.reverse();
+
       out.push({
         id: `${kind}-${armIndex ?? 'na'}-${bucket}-${serial++}`,
         kind,
@@ -130,12 +150,14 @@ export function analyseLines(
         density,
         zScore: z,
         pointIndices: sortedInts,
+        halfA,
+        halfB,
         x1: positions[(minK - 1) * 2],
         y1: positions[(minK - 1) * 2 + 1],
         x2: positions[(maxK - 1) * 2],
         y2: positions[(maxK - 1) * 2 + 1],
-        dirX: dirX / dlen,
-        dirY: dirY / dlen,
+        dirX: udx,
+        dirY: udy,
       });
     }
   };

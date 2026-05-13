@@ -21,6 +21,12 @@ export interface LineStat {
   // integers on this line (sorted ascending) — used for dedup across overlapping
   // line categories (e.g. screen-h vs arm-side[0] at angle 0°).
   pointIndices: number[];
+  // Each geometric line has two halves split at projection=0 along the line
+  // direction. Within each half integers grow monotonically with their
+  // along-line position, so they fit a single quadratic k(n) = a*n^2+b*n+c.
+  // Both halves are stored center-outward (closest-to-zero projection first).
+  halfA: number[];
+  halfB: number[];
   // endpoints in spiral coords: the min/max projection integers along the line
   // direction. SpiralCanvas extends these to the spiral bbox at draw time.
   x1: number;
