@@ -1,5 +1,7 @@
+import { useMemo } from 'react';
 import type { LineStat } from '../types';
 import type { PointHover } from './SpiralCanvas';
+import { fitQuadratic, formatPolynomial } from '../lib/formula';
 
 interface Props {
   line: LineStat | null;
@@ -19,6 +21,11 @@ const KIND_LABEL: Record<string, string> = {
 };
 
 export function Tooltip({ line, point, x, y, globalDensity }: Props) {
+  // Fit a quadratic to the line's integers — same line each render, only refit
+  // when the line changes.
+  const fit = useMemo(() => (line ? fitQuadratic(line.pointIndices) : null), [line]);
+
+
   if (point) {
     return (
       <div
@@ -77,6 +84,14 @@ export function Tooltip({ line, point, x, y, globalDensity }: Props) {
         <span className="k">Z-score</span>
         <span>{line.zScore.toFixed(2)}</span>
       </div>
+      {fit && (
+        <div className="tt-row" style={{ marginTop: '0.3rem' }}>
+          <span className="k">k(n) =</span>
+          <span style={{ color: '#f0b46a', fontFamily: 'monospace' }}>
+            {formatPolynomial(fit)}
+          </span>
+        </div>
+      )}
     </div>
   );
 }
